@@ -1,0 +1,117 @@
+void connect_two_lowest_point_numbers(int starting_point)
+{
+    int visited_points[];
+    int iter_limit = chi("iter_limit");
+    int current_iter = 0;
+    
+    //prepare recursive args
+    
+    int prev_points_list[];
+    int points_list[];
+    int depths_list[];
+    
+    push(points_list, starting_point);
+    push(depths_list, 0);
+    push(prev_points_list, -1);
+    
+    //start of function
+    while(len(points_list) > 0 && current_iter < iter_limit)
+    {
+        ++current_iter;
+        //function args
+        int current_point = pop(points_list, 0);
+        int current_depth = pop(depths_list, 0);
+        int prev_point = pop(prev_points_list, 0);
+        
+        setpointattrib(0, "current_iter", prev_point, current_iter);
+        
+        //setpointattrib(0, "current_iter", current_point, current_iter);
+        
+        int visited_count = len(visited_points);
+        int already_visited = 0;                
+        for(int i=0; i<visited_count; ++i)
+        {
+            if(visited_points[i] == current_point)
+            {
+                already_visited = 1;
+                break;
+            }
+        }
+        
+        if(already_visited)
+        {
+            continue;
+        }
+                    
+        
+        //if point is valid, connect pts
+        if(prev_point >= 0)
+        {
+            int new_prim = addprim(0, "polyline");
+            addvertex(0, new_prim, prev_point);
+            addvertex(0, new_prim, current_point);
+            setprimattrib(0, "curr_pt", new_prim, current_point);
+            setprimattrib(0, "prev_pt", new_prim, prev_point);
+        }
+        
+        setpointattrib(0, "depth", current_point, current_depth);
+        setpointattrib(0, "visited_points", current_point, visited_points);
+        int connected_points[] = neighbours(1, current_point);
+        int neighbour_count = len(connected_points);
+        
+        int valid_neighbours[];
+        
+        // if connected points in visited list, remove from consideration
+        
+        for(int j=0; j<neighbour_count; ++j)
+        {
+            int found_match = 0;
+                        
+            for(int i=0; i<visited_count; ++i)
+            {
+                if(visited_points[i] == connected_points[j])
+                {
+                    found_match = 1;
+                    break;
+                }
+            }
+            
+            if(!found_match)
+            {
+                push(valid_neighbours, connected_points[j]);
+            }
+        }
+
+        
+        //neighbour_count = len(connected_points);
+        push(visited_points, current_point);
+        valid_neighbours = sort(valid_neighbours);
+        
+        int valid_neighbour_count = len(valid_neighbours);
+        if(valid_neighbour_count >= 2)
+        {
+            int pt2 = valid_neighbours[1];
+            push(points_list, pt2);
+            push(depths_list, current_depth + 1);
+            push(prev_points_list, current_point);
+        }
+        
+        if(valid_neighbour_count >= 1)
+        {
+            int pt1 = valid_neighbours[0];
+            push(points_list, pt1);
+            push(depths_list, current_depth + 1);
+            push(prev_points_list, current_point);
+        }
+        
+        setpointattrib(0, "valid_neighbour_count", current_point, valid_neighbour_count);
+        setpointattrib(0, "valid_neighbours", current_point, valid_neighbours);
+    }
+}
+// ^^^^^^ function defs
+
+// main
+int current_point = @ptnum;
+
+connect_two_lowest_point_numbers(current_point);
+
